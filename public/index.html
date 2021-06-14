@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+  <style>
+    .form-control {
+      margin-bottom: 20px;
+    }
+
+    .nav-tabs {
+      margin: 10px;
+    }
+
+    .tab-content {
+      width: 50%;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Navbar</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
+      aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+      <ul id="navbar-nav" class="navbar-nav">
+      </ul>
+    </div>
+  </nav>
+
+  <ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item">
+      <a class="nav-link active" id="add-tab" data-toggle="tab" href="#add" role="tab" aria-controls="add"
+        aria-selected="true">Add</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="update-tab" data-toggle="tab" href="#update" role="tab" aria-controls="update"
+        aria-selected="false">Update</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="delete-tab" data-toggle="tab" href="#delete" role="tab" aria-controls="delete"
+        aria-selected="false">Delete</a>
+    </li>
+  </ul>
+
+  <div class="tab-content" id="myTabContent">
+
+    <!-- add-tab -->
+    <div class="tab-pane fade show active" id="add" role="tabpanel" aria-labelledby="add-tab">
+      <div class="form-group">
+        <label>Title</label>
+        <input id="addTitle" type="text" class="form-control" placeholder="title100">
+
+        <label>Item</label>
+        <input id="addItem" type="text" class="form-control" placeholder="item100">
+
+        <label>Link</label>
+        <input id="addLink" type="text" class="form-control" placeholder="https://www.yahoo.com">
+      </div>
+      <hr class="my-4">
+      <button id="addEnter" class="w-100 btn btn-primary btn-lg" data-target="#exampleModal" data-toggle="modal"
+        type="button">Add new nav</button>
+    </div>
+
+    <!-- update-tab -->
+    <div class="tab-pane fade" id="update" role="tabpanel" aria-labelledby="update-tab">
+      <div class="form-group">
+        <label>Title</label>
+        <!-- <input id="updateTitle" type="text" class="form-control" placeholder="title100"> -->
+        <select class="form-control deleteTitle"></select>
+
+        <label>Item</label>
+        <input id="updateItem" type="text" class="form-control" placeholder="item100">
+
+        <label>newUrl</label>
+        <input id="updateNewUrl" type="text" class="form-control" placeholder="https://www.yahoo.com">
+      </div>
+      <hr class="my-4">
+      <button id="updateEnter" class="w-100 btn btn-primary btn-lg" type="button" data-target="#exampleModal"
+        data-toggle="modal">Update a item</button>
+    </div>
+
+    <!-- delete-tab -->
+    <div class="tab-pane fade" id="delete" role="tabpanel" aria-labelledby="delete-tab">
+      <div class="form-group">
+        <label>Title</label>
+        <!-- <input id="deleteTitle" type="text" class="form-control" placeholder="title100"> -->
+        <select class="form-control deleteTitle"></select>
+
+        <label>Item</label>
+        <input id="deleteItem" type="text" class="form-control" data-toggle="tooltip" title="此欄位空值，將刪除整個title"
+          placeholder="item100">
+
+      </div>
+      <hr class="my-4">
+      <button id="deleteEnter" class="w-100 btn btn-primary btn-lg" data-target="#exampleModal" data-toggle="modal"
+        type="button">Delete a item</button>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalLabel"></h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div id="modalData" class="modal-body">
+          </div>
+          <div class="modal-footer">
+            <button id="ok" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+
+<script>
+  $(document).ready(() => {
+    $('[data-toggle="tooltip"]').tooltip()
+  })
+
+  // modal
+  const modalLabel = document.querySelector("#modalLabel")
+  const modalData = document.querySelector("#modalData")
+
+  const getfun = () => {
+    return fetch('./api/getMenu')
+      .then(response => {
+        return response.json()
+      })
+      .then(data => {
+        content(data)
+        return data
+      })
+  }
+  getfun()
+
+  const selectTitle = document.querySelectorAll(".deleteTitle")
+  const selectData = async () => {
+    for (const f of selectTitle) {
+      const result = await getfun()
+      f.innerHTML = ''
+      for (const e of result) {
+        f.innerHTML += `<option>${e.title}</option>`
+      }
+    }
+  }
+  selectData()
+
+  // Get
+  const content = (data) => {
+    let navBar = document.querySelector('#navbar-nav')
+    navBar.innerHTML = ''
+    data.forEach(e => {
+      if (e.items) {
+        let list = ""
+        e.items.forEach(f => {
+          list += `<a class="dropdown-item" href="${f.link}" target="_blank">${f.item}</a>`
+        })
+
+        navBar.innerHTML += `
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown"
+          aria-haspopup="true" aria-expanded="false">
+          ${e.title}
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            ${list}
+          </div>
+        </li>
+        `
+      }
+    })
+  }
+
+  // Post
+  const addfun = () => {
+    const title = document.querySelector("#addTitle").value
+    const item = document.querySelector("#addItem").value
+    const link = document.querySelector("#addLink").value
+    const data = { title, item, link }
+    fetch('./api/addMenu', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+      .then(response => response.json())
+      .then(data => {
+        getfun()
+        selectData()
+        modalLabel.innerHTML = 'Add Message'
+        modalData.innerHTML = data.message
+      })
+      .catch((error) => {
+        console.error('Error:', error)
+      })
+  }
+
+  const addEnter = document.querySelector("#addEnter")
+  addEnter.addEventListener("click", addfun, false)
+
+  // Update
+  const updatefun = () => {
+    const item = document.querySelector("#updateItem").value
+    const newUrl = document.querySelector("#updateNewUrl").value
+    const data = { title: selectTitle[0].value, item, newUrl }
+    fetch('./api/updateMenu', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+      .then(response => response.json())
+      .then(data => {
+        getfun()
+        selectData()
+        modalLabel.innerHTML = 'Update Message'
+        modalData.innerHTML = data.message
+      })
+      .catch((error) => {
+        console.error('Error:', error)
+      })
+  }
+
+  const updateEnter = document.querySelector("#updateEnter")
+  updateEnter.addEventListener("click", updatefun, false)
+
+  // Delete
+  const deletefun = async () => {
+    const item = document.querySelector("#deleteItem").value
+    const data = { title: selectTitle[1].value, item }
+    console.log(data)
+    fetch('./api/deleteMenu', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+      .then(response => response.json())
+      .then(data => {
+        getfun()
+        selectData()
+        modalLabel.innerHTML = 'Delete Message'
+        modalData.innerHTML = data.message
+      })
+      .catch((error) => {
+        console.error('Error:', error)
+      })
+  }
+
+  const deleteEnter = document.querySelector("#deleteEnter")
+  deleteEnter.addEventListener("click", deletefun, false)
+</script>
+
+</html>
